@@ -16,7 +16,9 @@
 #endif
 
 @implementation UIImage (MultiFormat)
-
+/* lzy注170725：
+ 根据data创建image
+ */
 + (nullable UIImage *)sd_imageWithData:(nullable NSData *)data {
     if (!data) {
         return nil;
@@ -119,11 +121,14 @@
 - (nullable NSData *)sd_imageData {
     return [self sd_imageDataAsFormat:SDImageFormatUndefined];
 }
-
+/* lzy注170724：
+ 将image转化为 指定的imageFormat格式的data
+ */
 - (nullable NSData *)sd_imageDataAsFormat:(SDImageFormat)imageFormat {
     NSData *imageData = nil;
     if (self) {
-#if SD_UIKIT || SD_WATCH
+#if SD_UIKIT || SD_WATCH // iOS、tvOS、watchOS会进入内部执行
+        // 获取图片的alpha通道信息，确定其是否为png
         int alphaInfo = CGImageGetAlphaInfo(self.CGImage);
         BOOL hasAlpha = !(alphaInfo == kCGImageAlphaNone ||
                           alphaInfo == kCGImageAlphaNoneSkipFirst ||
@@ -132,6 +137,11 @@
         BOOL usePNG = hasAlpha;
         
         // the imageFormat param has priority here. But if the format is undefined, we relly on the alpha channel
+        /* lzy注170724：
+         图片格式『未定义』：
+         是：取决于是否有alpha通道
+         否：有定义，定义的是否是png，是png，用png；不是png，用jpeg
+         */
         if (imageFormat != SDImageFormatUndefined) {
             usePNG = (imageFormat == SDImageFormatPNG);
         }

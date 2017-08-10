@@ -53,7 +53,16 @@
 - (NSUInteger)maxConcurrentDownloads {
     return self.manager.imageDownloader.maxConcurrentDownloads;
 }
-
+/* lzy注170726：
+ 1、index越界直接return
+ 2、请求数 + 1
+ 3、SDWebImageManager load一个url
+ 4、下载完成回调的处理
+ 4.1 finished为NO，直接return
+ 4.2 有获取结果的图片数 + 1
+ 4.3 图片存在，回调；不存在，回调，self.skippedCount（跳过数、失败数）+ 1
+ 4.4 当一张图片已经预先获取时调用的delegate方法
+ */
 - (void)startPrefetchingAtIndex:(NSUInteger)index {
     if (index >= self.prefetchURLs.count) return;
     self.requestedCount++;
@@ -81,11 +90,14 @@
              ];
         }
         if (self.prefetchURLs.count > self.requestedCount) {
+            // 还有没下的，接着下
             dispatch_async(self.prefetcherQueue, ^{
                 [self startPrefetchingAtIndex:self.requestedCount];
             });
         } else if (self.finishedCount == self.requestedCount) {
+            // 全部下过了
             [self reportStatus];
+            
             if (self.completionBlock) {
                 self.completionBlock(self.finishedCount, self.skippedCount);
                 self.completionBlock = nil;
@@ -94,7 +106,9 @@
         }
     }];
 }
-
+/* lzy注170726：
+ 全部下过了，调用这个代理方法
+ */
 - (void)reportStatus {
     NSUInteger total = (self.prefetchURLs).count;
     if ([self.delegate respondsToSelector:@selector(imagePrefetcher:didFinishWithTotalCount:skippedCount:)]) {
@@ -108,11 +122,16 @@
 - (void)prefetchURLs:(nullable NSArray<NSURL *> *)urls {
     [self prefetchURLs:urls progress:nil completed:nil];
 }
-
+/* lzy注170726：
+ 1、置空之前的预取器任务参数
+ 2、重新配置预取器任务参数
+ 3、开启预取器
+ */
 - (void)prefetchURLs:(nullable NSArray<NSURL *> *)urls
             progress:(nullable SDWebImagePrefetcherProgressBlock)progressBlock
            completed:(nullable SDWebImagePrefetcherCompletionBlock)completionBlock {
     [self cancelPrefetching]; // Prevent duplicate prefetch request
+    // 2、重新配置预取器任务参数
     self.startedTime = CFAbsoluteTimeGetCurrent();
     self.prefetchURLs = urls;
     self.completionBlock = completionBlock;
@@ -124,13 +143,21 @@
         }
     } else {
         // Starts prefetching from the very first image on the list with the max allowed concurrency
+        /* lzy注170726：
+         遍历任务urls数组开启 预取任务。
+         for循环限制条件需要同时满足：
+         1、当前请求数 < urls.count
+         2、i  < 最大并发数
+         */
         NSUInteger listCount = self.prefetchURLs.count;
         for (NSUInteger i = 0; i < self.maxConcurrentDownloads && self.requestedCount < listCount; i++) {
             [self startPrefetchingAtIndex:i];
         }
     }
 }
-
+/* lzy注170726：
+ 1、置空之前的预取器任务参数
+ */
 - (void)cancelPrefetching {
     self.prefetchURLs = nil;
     self.skippedCount = 0;

@@ -16,7 +16,7 @@
     if (!data) {
         return SDImageFormatUndefined;
     }
-    
+    // 获取文件的头8个字节
     uint8_t c;
     [data getBytes:&c length:1];
     switch (c) {

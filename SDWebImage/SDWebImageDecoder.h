@@ -12,8 +12,15 @@
 
 @interface UIImage (ForceDecode)
 
+/**
+ 画bitmap
+ */
 + (nullable UIImage *)decodedImageWithImage:(nullable UIImage *)image;
 
+/**
+如果配置了SDWebImageScaleDownLargeImages，对老设备，降低图片质量
+ iPad1、iPad2 、iPhone 3GS、 iPhone 4、iPod 2 and earlier devices: 10.
+ */
 + (nullable UIImage *)decodedAndScaledDownImageWithImage:(nullable UIImage *)image;
 
 @end

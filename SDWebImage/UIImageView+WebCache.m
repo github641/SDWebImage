@@ -40,11 +40,18 @@
     [self sd_setImageWithURL:url placeholderImage:placeholder options:options progress:nil completed:completedBlock];
 }
 
+/* lzy注170719：
+ 头文件加载一个image的方法，最终都将调用到这个方法中。
+ 本方法内部调用的UIView+WebCache的分类方法：
+ - (void)sd_internalSetImageWithURL:placeholderImage:options:operationKey:setImageBlock:progress:completed:
+ */
 - (void)sd_setImageWithURL:(nullable NSURL *)url
           placeholderImage:(nullable UIImage *)placeholder
                    options:(SDWebImageOptions)options
                   progress:(nullable SDWebImageDownloaderProgressBlock)progressBlock
                  completed:(nullable SDExternalCompletionBlock)completedBlock {
+    
+    
     [self sd_internalSetImageWithURL:url
                     placeholderImage:placeholder
                              options:options
@@ -69,6 +76,16 @@
 
 #pragma mark - Animation of multiple images
 
+/**lzy注170719
+ 根据一组图片URLs下载一组图片，并在『动画循环』中开启播放。
+ 1、执行本方法，先『取消当前动图的加载』
+ 2、申明一个数组，数组元素必须遵守SDWebImageOperation协议，该原始时图片下载操作类
+ 3、遍历数组，使用SDWebImageManager加载每个url，一个url对应一个下载操作对象，将操作对象放到数组中。
+ 4、下载操作完成回调的处理：
+     若下载完成imageView实例不存在，直接return；
+     在主线程处理图片绑定、动图播放和渲染操作
+ 
+ */
 - (void)sd_setAnimationImagesWithURLs:(nonnull NSArray<NSURL *> *)arrayOfURLs {
     [self sd_cancelCurrentAnimationImagesLoad];
     __weak __typeof(self)wself = self;

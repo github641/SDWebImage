@@ -14,7 +14,7 @@
 
 @interface UIView (WebCacheOperation)
 
-/**
+/**设置图片加载操作（使用字典管理，字典是对UIView的associated）
  *  Set the image load operation (storage in a UIView based dictionary)
  *
  *  @param operation the operation
@@ -22,14 +22,14 @@
  */
 - (void)sd_setImageLoadOperation:(nullable id)operation forKey:(nullable NSString *)key;
 
-/**
+/**为当前UIView取消key对应的下载操作
  *  Cancel all operations for the current UIView and key
  *
  *  @param key key for identifying the operations
  */
 - (void)sd_cancelImageLoadOperationWithKey:(nullable NSString *)key;
 
-/**
+/**从当前UIView的dict中，移除与key相关的图片下载操作，但不取消该操作
  *  Just remove the operations corresponding to the current UIView and key without cancelling them
  *
  *  @param key key for identifying the operations

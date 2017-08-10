@@ -21,7 +21,7 @@ typedef NS_ENUM(NSInteger, SDImageFormat) {
 
 @interface NSData (ImageContentType)
 
-/**
+/**通过给定的data，返回图片的类型
  *  Return image format
  *
  *  @param data the input image data

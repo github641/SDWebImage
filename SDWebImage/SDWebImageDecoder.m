@@ -22,6 +22,11 @@ static const size_t kBitsPerComponent = 8;
     
     // autorelease the bitmap context and all vars to help system to free memory when there are memory warning.
     // on iOS7, do not forget to call [[SDImageCache sharedImageCache] clearMemory];
+    /* lzy注170726：
+     创建自动释放池。
+     当收到内存警告时，释放bitmap上下文和所有变量，帮助系统回收内存。
+     在iOS7上，记得调用[[SDImageCache sharedImageCache] clearMemory];
+     */
     @autoreleasepool{
         
         CGImageRef imageRef = image.CGImage;

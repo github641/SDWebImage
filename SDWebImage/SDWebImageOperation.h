@@ -8,6 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
+/* lzy注170719：
+ SDWebImageOperation协议的内容，
+ 有一个cancel方法。
+ */
 @protocol SDWebImageOperation <NSObject>
 
 - (void)cancel;
